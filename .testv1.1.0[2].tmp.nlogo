@@ -189,7 +189,7 @@ OUTPUT
 
 PLOT
 46
-255
+85
 695
 562
 Total Poissons
