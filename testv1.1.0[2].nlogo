@@ -34,6 +34,7 @@ to setup-pecheurs
 end
 
 to go
+  show total-population
   if ticks >= simulation-duration [
     stop
   ]
@@ -95,8 +96,10 @@ to move-and-fish
 end
 
 to regenerate-fish
-  set fishs fishs + 0.1 * (1 - (fishs / 50)) ; Croissance logistique
+
+  set fishs fishs + taux-de-croissance-quotidien / 100 * (1 - (fishs / 50)) ; Croissance logistique
   if fishs > 50 [set fishs 50] ; Limite à la capacité maximale
+  if fishs < 0 [set fishs 0]
   set pcolor scale-color blue fishs 0 50
 end
 
@@ -203,7 +206,22 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot total-fishs"
+"default" 1.0 0 -16777216 true "" "plot total-population"
+
+SLIDER
+46
+92
+247
+125
+taux-de-croissance-quotidien
+taux-de-croissance-quotidien
+0
+100
+100.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
