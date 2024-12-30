@@ -123,13 +123,13 @@ to stop-fishing
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-700
-16
-1245
-562
+749
+71
+1222
+545
 -1
 -1
-16.3
+14.1
 1
 10
 1
@@ -150,10 +150,10 @@ ticks
 30.0
 
 BUTTON
-45
-27
-108
-60
+58
+82
+121
+115
 NIL
 setup
 NIL
@@ -167,10 +167,10 @@ NIL
 1
 
 BUTTON
-124
-27
-187
-60
+137
+82
+200
+115
 NIL
 go
 T
@@ -184,17 +184,17 @@ NIL
 1
 
 OUTPUT
-1256
-13
-1496
-67
+1269
+68
+1509
+122
 11
 
 PLOT
-46
-255
-695
-562
+59
+195
+708
+545
 Total Poissons
 Time
 nombre des poissons
@@ -209,15 +209,15 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot total-population"
 
 SLIDER
-46
-92
-247
-125
+59
+147
+260
+180
 taux-de-croissance-quotidien
 taux-de-croissance-quotidien
 0
 100
-100.0
+96.0
 1
 1
 NIL

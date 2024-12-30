@@ -99,7 +99,7 @@ to regenerate-fish
 
   set fishs fishs + taux-de-croissance-quotidien / 100 * (1 - (fishs / 50)) ; Croissance logistique
   if fishs > 50 [set fishs 50] ; Limite à la capacité maximale
-
+  if fishs < 0 [set fishs 0]
   set pcolor scale-color blue fishs 0 50
 end
 
@@ -192,7 +192,7 @@ OUTPUT
 
 PLOT
 46
-255
+140
 695
 562
 Total Poissons
@@ -217,7 +217,7 @@ taux-de-croissance-quotidien
 taux-de-croissance-quotidien
 0
 100
-20.0
+96.0
 1
 1
 NIL
