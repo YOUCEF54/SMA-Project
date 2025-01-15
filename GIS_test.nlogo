@@ -1,163 +1,40 @@
-globals [total-population total-fishs total-fishs-per-day simulation-duration]
-
-patches-own [fishs]
-breed [pecheurs pecheur]
-pecheurs-own [catch daily-catch paused-ticks count-pauses]
-;to setup
-  clear-all
-  setup-patches
-  setup-protected-zones ; Call this first to define restricted zones
-  setup-pecheurs ; Now pecheurs respect the protected zones
-  reset-ticks
-end
+extensions [gis]
+patches-own [vlocation]
 
 to setup
-  clear-all
-  set simulation-duration 24 * 30 ; 30 jours, avec 24 ticks par jour
-  set total-fishs 0
-  set total-fishs-per-day 0
-
-  setup-patches
-  setup-protected-zones ; Call to setup protected zones
-  setup-pecheurs
-  reset-ticks
+ clear-all
+ ask patches [ set pcolor white ]  ;;set background white
 end
 
-to setup-protected-zones
-  repeat 3 [ ; Number of protected zones (clusters)
-    let center one-of patches ; Choose a random patch as the center
-    ask patches with [distance center <= 3] [ ; Radius of the cluster (3 patches wide)
-      set fishs 100 ; Protected zones have a lot of fish
-      set pcolor red ; Color the patches in the cluster red
-    ]
-]
-end
-to setup-patches
-  ask patches [
-    set fishs random 50 ; Initialiser les poissons entre 0 et 50
-    set pcolor scale-color blue fishs 0 50 ; Colorer en fonction de la densité de poissons
-  ]
+;;import the road downloaded from OpenstreetMap
+to load
+  let view1 gis:load-dataset "map.osm"
+  gis:set-world-envelope gis:envelope-of view1
 
-
-end
-
-to setup-pecheurs
-  create-pecheurs 50 [
-    let valid-position? false
-    while [not valid-position?] [
-      setxy random-xcor random-ycor
-      if [pcolor] of patch-here != red [ ; Ensure the patch is not part of a protected zone
-        set valid-position? true
-      ]
-    ]
-    set color green
-    set size 1.5
-    set catch 0
-    set daily-catch 0
-    set paused-ticks 0
-    set count-pauses 0
+  foreach gis:feature-list-of view1
+  [
+    gis:set-drawing-color blue     ;;draw road as blue
+    gis:draw view1 0.5
   ]
 end
 
-to go
-  show total-population
-  if ticks >= simulation-duration [
-    stop
+to add-turtles
+  create-turtles 1
+  ask turtles       ;; create turtles on road which is blue only
+  [
+    set vlocation one-of patches with [pcolor = blue]
+    move-to vlocation
   ]
-  ask turtles [move-and-fish]
-
-  ; Regenerate fish every 24 ticks (representing a day)
-  if ticks mod 24 = 0 [
-    ; Reset daily stats
-     wait 1
-    ask pecheurs [
-      set daily-catch 0
-      set paused-ticks 0
-      set count-pauses 0 ; Reset pause count for the new day
-    ]
-    ask patches [regenerate-fish]
-    update-total-fishs-per-day
-    update-total-fishs
-    update-variables
-  ]
-
-  tick
-end
-
-to move-and-fish
-  if paused-ticks > 0 [ ; If paused, decrement the pause timer and skip fishing
-    set paused-ticks paused-ticks - 1
-    if paused-ticks = 0 [ ; If pause ends, restore color
-      set color green ; Restore the initial color when the pause is finished
-      set size 1.5
-    ]
-    stop
-  ]
-
-  if count-pauses >= 10 [
-    set color red ; Indicate permanent block
-    stop
-  ]
-
-  if daily-catch <= 100 [ ; Only allow fishing if daily catch is less than or equal to 100
-    set heading random 360
-    if count(neighbors with [pcolor = red]) >= 1 [
-      set heading (- heading)
-    ]
-    fd 1
-    if [fishs] of patch-here > 0 [
-      set catch catch + 10
-      set daily-catch daily-catch + 10
-      ask patch-here [
-        set fishs fishs - 10
-        set pcolor scale-color blue fishs 0 50
-      ]
-    ]
-  ]
-
-  if daily-catch > 100 [ ; If daily-catch exceeds 100, pause the fisherman for 1 tick
-    set paused-ticks 1
-    set count-pauses count-pauses + 1
-    stop-fishing
-
-  ]
-end
-
-to regenerate-fish
-
-  set fishs fishs + taux-de-croissance-quotidien / 100 * (1 - (fishs / 50)) ; Croissance logistique
-  if fishs > 50 [set fishs 50] ; Limite à la capacité maximale
-  if fishs < 0 [set fishs 0]
-  set pcolor scale-color blue fishs 0 50
-end
-
-to update-variables
-  set total-population sum [fishs] of patches
-end
-
-to update-total-fishs-per-day
-  set total-fishs-per-day sum [catch] of pecheurs
-end
-
-to update-total-fishs
-  set total-fishs total-fishs + total-fishs-per-day
-end
-
-to stop-fishing
-  set color gray ; Indicate fisher is inactive
-  set size 1
-  set heading 360
-  stop
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-749
-71
-1222
-545
+624
+10
+1169
+556
 -1
 -1
-14.1
+16.3
 1
 10
 1
@@ -178,10 +55,10 @@ ticks
 30.0
 
 BUTTON
-58
-82
-121
-115
+129
+54
+192
+87
 NIL
 setup
 NIL
@@ -195,13 +72,13 @@ NIL
 1
 
 BUTTON
-137
-82
-200
-115
+131
+99
+194
+132
 NIL
-go
-T
+load
+NIL
 1
 T
 OBSERVER
@@ -210,46 +87,6 @@ NIL
 NIL
 NIL
 1
-
-OUTPUT
-1269
-68
-1509
-122
-11
-
-PLOT
-59
-195
-708
-545
-Total Poissons
-Time
-nombre des poissons
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot total-population"
-
-SLIDER
-59
-147
-260
-180
-taux-de-croissance-quotidien
-taux-de-croissance-quotidien
-0
-100
-68.0
-1
-1
-NIL
-HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

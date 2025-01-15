@@ -3,27 +3,53 @@ globals [total-population total-fishs total-fishs-per-day simulation-duration]
 patches-own [fishs]
 breed [pecheurs pecheur]
 pecheurs-own [catch daily-catch paused-ticks count-pauses]
+;to setup
+;  clear-all
+;  setup-patches
+;  setup-protected-zones ; Call this first to define restricted zones
+;  setup-pecheurs ; Now pecheurs respect the protected zones
+;  reset-ticks
+;end
 
 to setup
   clear-all
   set simulation-duration 24 * 30 ; 30 jours, avec 24 ticks par jour
   set total-fishs 0
   set total-fishs-per-day 0
+
   setup-patches
+  setup-protected-zones ; Call to setup protected zones
   setup-pecheurs
   reset-ticks
 end
 
+to setup-protected-zones
+  repeat 3 [ ; Number of protected zones (clusters)
+    let center one-of patches ; Choose a random patch as the center
+    ask patches with [distance center <= 3] [ ; Radius of the cluster (3 patches wide)
+      set fishs 100 ; Protected zones have a lot of fish
+      set pcolor red ; Color the patches in the cluster red
+    ]
+]
+end
 to setup-patches
   ask patches [
     set fishs random 50 ; Initialiser les poissons entre 0 et 50
     set pcolor scale-color blue fishs 0 50 ; Colorer en fonction de la densité de poissons
   ]
+
+
 end
 
 to setup-pecheurs
   create-pecheurs 50 [
-    setxy random-xcor random-ycor
+    let valid-position? false
+    while [not valid-position?] [
+      setxy random-xcor random-ycor
+      if [pcolor] of patch-here != red [ ; Ensure the patch is not part of a protected zone
+        set valid-position? true
+      ]
+    ]
     set color green
     set size 1.5
     set catch 0
@@ -69,13 +95,15 @@ to move-and-fish
   ]
 
   if count-pauses >= 10 [
-
     set color red ; Indicate permanent block
     stop
   ]
 
   if daily-catch <= 100 [ ; Only allow fishing if daily catch is less than or equal to 100
     set heading random 360
+    if count(neighbors with [pcolor = red]) >= 1 [
+      set heading (- heading)
+    ]
     fd 1
     if [fishs] of patch-here > 0 [
       set catch catch + 10
@@ -217,7 +245,7 @@ taux-de-croissance-quotidien
 taux-de-croissance-quotidien
 0
 100
-96.0
+68.0
 1
 1
 NIL
