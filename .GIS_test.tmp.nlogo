@@ -8,13 +8,13 @@ end
 
 ;;import the road downloaded from OpenstreetMap
 to load
-  let view1 gis:load-dataset "map/lines.shp"
+  let view1 gis:load-dataset "layer-activity-data-0/public-global-fishing-effort-v3 .0.md"
   gis:set-world-envelope gis:envelope-of view1
 
   foreach gis:feature-list-of view1
   [
     gis:set-drawing-color blue     ;;draw road as blue
-    gis:draw view1 0.7
+    gis:draw view1 0.5
   ]
 end
 
@@ -28,13 +28,13 @@ to add-turtles
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-505
-19
-1073
-588
+624
+10
+1169
+556
 -1
 -1
-16.97
+16.3
 1
 10
 1
